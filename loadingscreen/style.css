@@ -1,217 +1,164 @@
-/* Réinitialisation complète pour le plein écran */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #fff;
+// --- CONFIGURATION DES INFOS EN CONTINU (Avec Staff, VIP, Astuces...) ---
+const infosList = [
+    { title: "📜 Règle d'or", text: "Respectez impérativement le FearRP, le PainRP et la cohérence de vos rôles en toutes circonstances." },
+    { title: "🛡️ L'Équipe du Staff", text: "Un problème en jeu ? Notre équipe de modération est à votre écoute ! N'hésitez pas à ouvrir un ticket via le menu." },
+    { title: "⚔️ Propriétés", text: "Le Propskill, Propblock, Proppush ou Propclimb sont interdits et lourdement sanctionnés par le staff." },
+    { title: "💎 Avantages VIP", text: "Devenez membre VIP pour débloquer des métiers exclusifs, des véhicules de luxe inédits et soutenir le projet !" },
+    { title: "📢 Communauté", text: "Rejoignez notre Discord officiel (discord.gg/votreserveur) pour suivre l'actualité des mises à jour !" },
+    { title: "💡 Astuce Légale", text: "Consultez le menu F4 en jeu pour acheter des imprimantes à billets (money printers) et générer du cash passivement." }
+];
+
+// --- CONFIGURATION DE LA PLAYLIST MUSIQUE ---
+const playlist = [
+    { file: "musique1.mp3", title: "PhonkWave - Cyber Street" },
+    { file: "musique2.mp3", title: "LoFi Chill - DarkRP Night" },
+    { file: "musique3.mp3", title: "Synthwave - Neon Pursuit" }
+];
+
+// Récupération des éléments HTML
+const music = document.getElementById('loading-music');
+const musicTitle = document.getElementById('music-title');
+const newsContainer = document.getElementById('news-container');
+
+// --- LOGIQUE DU DÉFILEMENT DES TEXTES ---
+let currentInfoIndex = 0;
+
+function updateInfos() {
+    const info = infosList[currentInfoIndex];
+    newsContainer.innerHTML = "";
+    setTimeout(() => {
+        newsContainer.innerHTML = `
+            <div class="fade-in-out">
+                <div class="ticker-title">${info.title}</div>
+                <div class="ticker-text">${info.text}</div>
+            </div>
+        `;
+    }, 50);
+    currentInfoIndex = (currentInfoIndex + 1) % infosList.length;
+}
+updateInfos();
+setInterval(updateInfos, 5000);
+
+
+// --- LOGIQUE DE LA MUSIQUE ALEATOIRE ---
+let currentTrackIndex = -1;
+let hasStartedPlaying = false; 
+
+function playRandomTrack() {
+    if (playlist.length === 0) return;
+    
+    let newIndex;
+    // Si la playlist contient plusieurs morceaux, on évite de rejouer le même à la suite
+    if (playlist.length > 1) {
+        do {
+            newIndex = Math.floor(Math.random() * playlist.length);
+        } while (newIndex === currentTrackIndex);
+    } else {
+        newIndex = 0;
+    }
+    
+    currentTrackIndex = newIndex;
+    const track = playlist[currentTrackIndex];
+    music.src = track.file;
+    musicTitle.innerText = track.title; 
+    music.volume = 0.25; // Volume fixé à 25% (idéal pour un fond sonore)
+    
+    music.play().then(() => {
+        hasStartedPlaying = true;
+    }).catch(error => {
+        console.log("Lecture automatique bloquée. En attente d'une interaction joueur ou GMod.");
+    });
 }
 
-body {
-    background: #050505;
-    background-image: url('background.png'); 
-    background-size: cover;        
-    background-position: center;   
-    background-repeat: no-repeat;  
-    height: 100vh;
-    overflow: hidden; 
+// Lancement immédiat d'un morceau au hasard au chargement initial
+playRandomTrack();
+
+// Sécurité pour forcer la lecture au premier clic ou interaction sur l'écran
+document.body.addEventListener('click', () => {
+    if (music.paused) { 
+        music.play();
+        hasStartedPlaying = true;
+    }
+}, { once: true });
+
+function toggleMusic() {
+    if (music.paused) { music.play(); hasStartedPlaying = true; }
 }
 
-/* Fond assombri pour le contraste */
-.background-overlay {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(5,5,10,0.9) 100%);
-    z-index: 1;
+// Gestion de la boucle infinie : relance un nouveau morceau aléatoire dès que la piste se termine
+music.onended = function() { 
+    playRandomTrack(); 
+};
+
+
+// --- ASSIGNATION AUTOMATIQUE DES INFOS GARRY'S MOD (Pseudo, Avatar, Map, Fichiers) ---
+window.totalFiles = 0;
+window.neededFiles = 0;
+
+function GameDetails( servername, serverurl, mapname, maxplayers, steamid, gamemode ) {
+    document.getElementById('map-name').innerText = "Map : " + mapname;
+    
+    // Récupération de l'avatar Steam officiel fourni par l'API GMod
+    if (steamid && steamid !== "" && steamid !== "0") {
+        document.getElementById('player-avatar').src = "asset://garrysmod/avatars/" + steamid + ".png";
+    }
+    
+    if (!hasStartedPlaying) { toggleMusic(); }
 }
 
-/* --- EFFET PARTICULES (FLOTTANTES ET DISCRÈTES) --- */
-.particles-container {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    overflow: hidden;
-    z-index: 2;
-    pointer-events: none; /* Laisse passer les clics de souris */
+// Fonction native appelée par GMod pour transmettre le nom du joueur connecté
+function SetPlayerName( name ) {
+    if (name && name !== "" && name !== "%" + "s") {
+        document.getElementById('player-name').innerText = name;
+    }
 }
 
-.particle {
-    position: absolute;
-    bottom: -20px;
-    width: 6px;
-    height: 6px;
-    background: rgba(255, 69, 0, 0.4);
-    box-shadow: 0 0 10px #ff4500, 0 0 20px #ff8c00;
-    border-radius: 50%;
-    animation: floatUp 8s infinite linear;
+// Sécurité URL alternative pour la détection pseudo & avatar (Utile selon le type de connexion)
+const urlParams = new URLSearchParams(window.location.search);
+const nameParam = urlParams.get('username') || urlParams.get('name');
+if (nameParam) {
+    document.getElementById('player-name').innerText = decodeURIComponent(nameParam);
+}
+const steamParam = urlParams.get('steamid');
+if (steamParam && steamParam !== "%s") {
+    document.getElementById('player-avatar').src = "asset://garrysmod/avatars/" + steamParam + ".png";
 }
 
-/* Positionnement aléatoire initial et vitesse des particules */
-.particle:nth-child(1) { left: 10%; animation-duration: 6s; animation-delay: 0s; }
-.particle:nth-child(2) { left: 25%; animation-duration: 9s; animation-delay: 2s; }
-.particle:nth-child(3) { left: 40%; animation-duration: 7s; animation-delay: 4s; }
-.particle:nth-child(4) { left: 55%; animation-duration: 11s; animation-delay: 1s; }
-.particle:nth-child(5) { left: 70%; animation-duration: 8s; animation-delay: 5s; }
-.particle:nth-child(6) { left: 85%; animation-duration: 10s; animation-delay: 3s; }
-.particle:nth-child(7) { left: 15%; animation-duration: 7.5s; animation-delay: 1.5s; }
-.particle:nth-child(8) { left: 48%; animation-duration: 9.5s; animation-delay: 0.5s; }
-.particle:nth-child(9) { left: 78%; animation-duration: 6.5s; animation-delay: 2.5s; }
-
-@keyframes floatUp {
-    0% { transform: translateY(0) scale(1); opacity: 0; }
-    10% { opacity: 0.7; }
-    90% { opacity: 0.7; }
-    100% { transform: translateY(-105vh) scale(0.5); opacity: 0; }
+function SetStatusChanged( status ) {
+    document.getElementById('status-text').innerText = status;
+    if (!hasStartedPlaying) { toggleMusic(); }
 }
 
-/* Grille principale plein écran */
-.fullscreen-dashboard {
-    position: relative;
-    z-index: 3; /* Passe au-dessus des particules */
-    height: 100vh;
-    width: 100vw;
-    padding: 40px 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+function SetFilesTotal( total ) {
+    window.totalFiles = Math.max(0, total);
+    updateProgressBar();
 }
 
-/* --- HAUT DE L'ÉCRAN (Profil Steam inclus) --- */
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: 100%;
+function SetFilesNeeded( needed ) {
+    window.neededFiles = Math.max(0, needed);
+    updateProgressBar();
 }
 
-.player-profile-box {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+function DownloadingFile( fileName ) {
+    document.getElementById('file-current').innerText = "Téléchargement : " + fileName;
 }
 
-#player-avatar {
-    width: 64px;
-    height: 64px;
-    border-radius: 8px;
-    border: 2px solid #ff4500;
-    box-shadow: 0 0 15px rgba(255, 69, 0, 0.4);
-    background: #111;
+function updateProgressBar() {
+    let total = window.totalFiles;
+    let needed = window.neededFiles;
+    
+    if (!total || total <= 0) {
+        document.getElementById('progress-bar').style.width = "0%";
+        document.getElementById('progress-percentage').innerText = "0%";
+        document.getElementById('file-count').innerText = "Fichiers : 0 / 0";
+        return;
+    }
+
+    let downloaded = Math.max(0, total - needed);
+    let percentage = Math.floor((downloaded / total) * 100);
+    if (percentage > 100) percentage = 100;
+
+    document.getElementById('progress-bar').style.width = percentage + "%";
+    document.getElementById('progress-percentage').innerText = percentage + "%";
+    document.getElementById('file-count').innerText = "Fichiers : " + downloaded + " / " + total;
 }
-
-.server-name {
-    font-size: 2.6rem;
-    letter-spacing: 2px;
-    font-weight: 900;
-    text-shadow: 0 0 15px rgba(255, 69, 0, 0.4);
-    line-height: 1.1;
-}
-
-.highlight { color: #ff4500; }
-.player-welcome { color: #bbb; font-size: 1.05rem; margin-top: 3px; }
-
-/* Widget Musique */
-.music-dashboard-widget {
-    background: rgba(10, 10, 15, 0.85);
-    border: 1px solid rgba(255, 69, 0, 0.3);
-    padding: 15px 20px;
-    border-radius: 8px;
-    backdrop-filter: blur(8px);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-width: 340px;
-}
-
-.music-info { font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.music-label { color: #aaa; margin-right: 5px; }
-#music-title { color: #ff4500; font-weight: bold; }
-.music-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-
-.music-actions button {
-    background: rgba(255, 69, 0, 0.15);
-    border: 1px solid #ff4500;
-    padding: 8px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: bold;
-    transition: all 0.2s ease;
-    flex: 1;
-    text-align: center;
-}
-
-.music-actions button:hover {
-    background: rgba(255, 69, 0, 0.4);
-    box-shadow: 0 0 10px rgba(255, 69, 0, 0.3);
-}
-
-.volume-container { display: flex; align-items: center; gap: 6px; background: rgba(0, 0, 0, 0.4); padding: 6px 10px; border-radius: 4px; }
-#volume-slider { width: 70px; cursor: pointer; accent-color: #ff4500; }
-
-.hotkeys-hint {
-    font-size: 0.7rem;
-    color: #777;
-    text-align: center;
-    margin-top: -2px;
-}
-
-/* --- MILIEU DE L'ÉCRAN --- */
-.content-area {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    flex: 1;
-    margin: 20px 0;
-}
-
-.ticker-box {
-    width: 80%;
-    max-width: 900px;
-    background: rgba(10, 10, 15, 0.75);
-    border-left: 5px solid #ff4500;
-    padding: 40px;
-    border-radius: 8px;
-    backdrop-filter: blur(6px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-    text-align: center;
-    min-height: 200px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.ticker-title { color: #ff4500; font-size: 1.6rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; font-weight: bold; }
-.ticker-text { font-size: 1.2rem; color: #ddd; line-height: 1.6; }
-
-.fade-in-out { animation: fadeEffect 5s infinite ease-in-out; }
-@keyframes fadeEffect {
-    0% { opacity: 0; transform: translateY(10px); }
-    10% { opacity: 1; transform: translateY(0); }
-    90% { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-10px); }
-}
-
-/* --- BAS DE L'ÉCRAN --- */
-.bottom-bar { 
-    width: 100%; 
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.status-container, .files-container { 
-    display: flex; 
-    justify-content: space-between; 
-    font-size: 0.95rem; 
-}
-
-.status-container { color: #fff; font-weight: 600; }
-.files-container { color: #aaa; font-size: 0.85rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 4px; }
-#map-name, #file-count { color: #ff4500; font-weight: bold; }
-#file-current { max-width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.progress-bar-wrapper { display: flex; align-items: center; gap: 15px; width: 100%; margin-top: 4px; }
-.progress-bar-container { flex: 1; height: 18px; background: rgba(20, 20, 25, 0.9); border-radius: 9px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); }
-#progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff4500 0%, #ff7f50 100%); border-radius: 9px; box-shadow: 0 0 15px rgba(255, 69, 0, 0.6); transition: width 0.2s ease-out; }
-#progress-percentage { font-size: 1.1rem; font-weight: bold; color: #ff4500; min-width: 50px; text-align: right; }
