@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Screen DarkRP - Édition Ultime</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="background-overlay"></div>
+
+    <div class="particles-container">
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+    </div>
+
+    <audio id="loading-music"></audio>
+
+    <div class="fullscreen-dashboard">
+        
+        <div class="top-bar">
+            <div class="player-profile-box">
+                <img id="player-avatar" src="https://steamcommunity-a.akamaihd.net/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg" alt="Avatar">
+                <header class="server-header">
+                    <h1 class="server-name">MON SERVEUR <span class="highlight">DARKRP</span></h1>
+                    <p class="player-welcome">Bienvenue, <span id="player-name">Joueur</span></p>
+                </header>
+            </div>
+
+            <div class="music-dashboard-widget">
+                <div class="music-info">
+                    <span class="music-label">🎵 En écoute :</span>
+                    <span id="music-title">Sélection en cours...</span>
+                </div>
+                <div class="music-actions">
+                    <button id="play-pause-btn" onclick="toggleMusic()"><span>⏸️</span> Pause</button>
+                    <button id="next-btn" onclick="nextMusic()"><span>⏭️</span> Suivant</button>
+                    <div class="volume-container">
+                        <span id="volume-icon">🔊</span>
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.25" oninput="changeVolume(this.value)">
+                    </div>
+                </div>
+                <div class="hotkeys-hint">Clavier : [Espace] Suivant | [M] Muet</div>
+            </div>
+        </div>
+
+        <main class="content-area">
+            <div class="ticker-box">
+                <div id="news-container">
+                    </div>
+            </div>
+        </main>
+
+        <footer class="bottom-bar">
+            
+            <div class="status-container">
+                <p id="status-text">Initialisation de la connexion...</p>
+                <p id="map-name">Chargement de la carte...</p>
+            </div>
+
+            <div class="files-container">
+                <p id="file-current">En attente de fichiers...</p>
+                <p id="file-count">Fichiers : 0 / 0</p>
+            </div>
+
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar-container">
+                    <div id="progress-bar"></div>
+                </div>
+                <span id="progress-percentage">0%</span>
+            </div>
+        </footer>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
