@@ -185,4 +185,4 @@ body {
 .progress-bar-wrapper { display: flex; align-items: center; gap: 15px; width: 100%; margin-top: 4px; }
 .progress-bar-container { flex: 1; height: 18px; background: rgba(20, 20, 25, 0.9); border-radius: 9px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); }
 #progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff4500 0%, #ff7f50 100%); border-radius: 9px; box-shadow: 0 0 15px rgba(255, 69, 0, 0.6); transition: width 0.2s ease-out; }
-#progress-percentage { font-size: 1.1rem; font-weight: bold; color: #ff4500; min-width: 50px; text-align: right; }
+#progress-percentage { font-size: 1.1rem; font-weight: bold; color: #ff4500; min-width: 50px; text-align: right; } 
