@@ -11,8 +11,8 @@ const infosList = [
 // --- CONFIGURATION DE LA PLAYLIST MUSIQUE ---
 const playlist = [
     { file: "musique1.mp3", title: "LUV RESVAL x STROMAE ft. ALKPOTE - Célébration 2 x Formidable" },
-    { file: "musique2.mp3", title: "LoFi Chill - DarkRP Night" },
-    { file: "musique3.mp3", title: "Synthwave - Neon Pursuit" }
+    { file: "musique2.mp3", title: "Vacra - XOXO" },
+    { file: "musique3.mp3", title: "Werenoi - Jalouse" }
 ];
 
 // Récupération des éléments HTML
